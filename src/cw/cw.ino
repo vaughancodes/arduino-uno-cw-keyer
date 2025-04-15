@@ -66,7 +66,7 @@ void playDah() {
 void loop() {
   /*
   Reads paddle states, and triggers iambic keying according to paddle inputs.
-  Current tone status is written to serial as a byte for bitmasking by the receiver.
+  Detected morse characters are written to serial with proper timing/spacing.
   */
 
   // Read current paddle states
@@ -80,21 +80,22 @@ void loop() {
       playDit();
     }
   } else {
-    if (rPaddleState == LOW) {
+    if (rPaddleState == LOW) { // If right paddle pressed
       playDit();
-    } else if (lPaddleState == LOW) {
+    } else if (lPaddleState == LOW) { // If left paddle pressed
       playDah();
     } else {
-      // Break character after long enough break
+      // Break character after long enough delay
       if (((millis() - lastInputTime) > 2 * ditDuration)) {
         if (charStarted == true) {
-          Serial.print(decodeMorse(currentChar));
-          memset(currentChar,0,strlen(currentChar));
+          Serial.print(decodeMorse(currentChar));  // Print decoded character
+          memset(currentChar,0,strlen(currentChar)); // Null out current encoded character var
           charStarted = false;
         }
+        // Break word after long enough delay
         if (((millis() - lastInputTime) > 6 * ditDuration) && wordStarted == true) {
           wordStarted = false;
-          Serial.print(' ');
+          Serial.print(' ');  // Print space
         }
       }
     }
